@@ -21,6 +21,13 @@
   - [Custom Firmware Development](#custom-firmware-development)
 - [Technical Limitations](#technical-limitations)
 - [Recommendations](#recommendations)
+- [MCU Swap Options](#mcu-swap-options)
+  - [Feasibility Assessment](#feasibility-assessment)
+  - [Recommended RP2040-Based Replacement Controllers](#recommended-rp2040-based-replacement-controllers)
+  - [Step-by-Step MCU Swap Process](#step-by-step-mcu-swap-process)
+  - [Handling Existing Features](#handling-existing-features)
+  - [Preserving Hot-Swap Sockets](#preserving-hot-swap-sockets)
+  - [Reference Projects](#reference-projects)
 - [References](#references)
 
 ---
@@ -358,6 +365,270 @@ If you need **complete firmware control**, consider:
 3. **Hybrid Approach**:
    - Keep CH57x keyboard for daily use with this tool
    - Build a second keyboard for experimentation
+
+4. **MCU Swap** (hardware modification):
+   - Keep the existing key switch sockets and case
+   - Replace the CH57x MCU with an RP2040-based board
+   - See [MCU Swap Options](#mcu-swap-options) section below
+
+---
+
+## MCU Swap Options
+
+If you want to keep your existing keyboard's switches, case, and layout but gain full firmware control, you can perform an MCU swap. This involves removing or bypassing the CH57x chip and wiring the key matrix to a new microcontroller.
+
+### Feasibility Assessment
+
+| Factor | Assessment | Notes |
+|--------|------------|-------|
+| Difficulty | Moderate-Advanced | Requires PCB tracing, soldering skills |
+| Reversibility | Low | Original MCU may be damaged or removed |
+| Cost | $5-$15 | Cost of replacement MCU board |
+| Time | 2-4 hours | Depending on keyboard complexity |
+| Success Rate | High | If matrix is properly traced |
+
+### Recommended RP2040-Based Replacement Controllers
+
+#### Compact Options (Best for Small Macropads)
+
+| Board | Size | GPIO Pins | Features | Price |
+|-------|------|-----------|----------|-------|
+| **Seeed XIAO RP2040** | 20x17.5mm | 11 | Tiny, USB-C, onboard RGB | ~$5 |
+| **Waveshare RP2040-Zero** | 23x18mm | 20 | Reset button, USB-C | ~$4 |
+| **Raspberry Pi Pico** | 51x21mm | 26 | Most GPIO, cheap | ~$4 |
+
+#### Pro Micro Footprint (For Larger Builds)
+
+| Board | Footprint | Features | Firmware Support |
+|-------|-----------|----------|------------------|
+| **Adafruit KB2040** | Pro Micro | USB-C, STEMMA QT | QMK, ZMK, RMK |
+| **SparkFun Pro Micro RP2040** | Pro Micro | USB-C | QMK, ZMK |
+| **Boardsource Blok** | Pro Micro | RGB LED, USB-C | QMK, ZMK |
+| **Elite-Pi** | Pro Micro | USB-C | QMK, ZMK |
+
+### Step-by-Step MCU Swap Process
+
+#### Step 1: Trace the Key Matrix
+
+Before any hardware changes, you must understand how keys are wired:
+
+1. **Open the keyboard** and identify the PCB
+2. **Locate the CH57x chip** (usually marked CH573 or similar)
+3. **Trace connections** from each key switch to the MCU
+   - Use multimeter in continuity mode
+   - Create a diagram mapping rows and columns
+
+**Typical CH57x Matrix Layouts:**
+
+```
+3x4 Keyboard (12 keys + 2 knobs):
+┌─────┬─────┬─────┬─────┐
+│ K1  │ K2  │ K3  │ K4  │  Row 0
+├─────┼─────┼─────┼─────┤
+│ K5  │ K6  │ K7  │ K8  │  Row 1
+├─────┼─────┼─────┼─────┤
+│ K9  │ K10 │ K11 │ K12 │  Row 2
+└─────┴─────┴─────┴─────┘
+ Col0  Col1  Col2  Col3
+
+Requires: 3 row pins + 4 column pins = 7 GPIO
+```
+
+```
+3x3 Keyboard (9 keys + 2 knobs):
+┌─────┬─────┬─────┐
+│ K1  │ K2  │ K3  │  Row 0
+├─────┼─────┼─────┤
+│ K4  │ K5  │ K6  │  Row 1
+├─────┼─────┼─────┤
+│ K7  │ K8  │ K9  │  Row 2
+└─────┴─────┴─────┘
+ Col0  Col1  Col2
+
+Requires: 3 row pins + 3 column pins = 6 GPIO
+```
+
+#### Step 2: Document Pin Mapping
+
+Create a mapping table:
+
+```
+CH57x Pin | Function    | New RP2040 Pin
+----------|-------------|---------------
+PA0       | Row 0       | GP0
+PA1       | Row 1       | GP1
+PA2       | Row 2       | GP2
+PB0       | Col 0       | GP3
+PB1       | Col 1       | GP4
+PB2       | Col 2       | GP5
+PB3       | Col 3       | GP6
+PC0       | Encoder A   | GP7
+PC1       | Encoder B   | GP8
+PC2       | Encoder SW  | GP9
+```
+
+#### Step 3: Hardware Modification Options
+
+**Option A: Direct Wire (Recommended for beginners)**
+
+1. Leave CH57x in place but cut its traces
+2. Solder wires from matrix pads to RP2040 GPIO
+3. Power RP2040 from USB independently
+
+**Option B: Replace CH57x (Clean but advanced)**
+
+1. Desolder/remove CH57x chip with hot air
+2. Identify power/ground pads
+3. Wire RP2040 to existing matrix traces
+4. May require trace cutting and jumper wires
+
+**Option C: Piggyback (Non-destructive)**
+
+1. Disable CH57x by cutting its USB data lines
+2. Tap into matrix with parallel connections
+3. Both MCUs can remain, but only RP2040 active
+
+#### Step 4: Wiring Diagram Example
+
+For a 3x4 matrix with 2 rotary encoders using XIAO RP2040:
+
+```
+XIAO RP2040          Key Matrix
+┌────────────┐       ┌─────────────────┐
+│ GP0 (D0)   ├───────┤ Row 0           │
+│ GP1 (D1)   ├───────┤ Row 1           │
+│ GP2 (D2)   ├───────┤ Row 2           │
+│ GP3 (D3)   ├───────┤ Col 0           │
+│ GP4 (D4)   ├───────┤ Col 1           │
+│ GP5 (D5)   ├───────┤ Col 2           │
+│ GP6 (D6)   ├───────┤ Col 3           │
+│ GP7 (D7)   ├───────┤ Encoder 1 A     │
+│ GP8 (D8)   ├───────┤ Encoder 1 B     │
+│ GP9 (D9)   ├───────┤ Encoder 1 Switch│
+│ GP10 (D10) ├───────┤ Encoder 2 A     │
+│ 3.3V       ├───────┤ VCC (if needed) │
+│ GND        ├───────┤ GND             │
+└────────────┘       └─────────────────┘
+```
+
+#### Step 5: Firmware Configuration
+
+**QMK Configuration Example:**
+
+```c
+// config.h
+#define MATRIX_ROWS 3
+#define MATRIX_COLS 4
+
+#define MATRIX_ROW_PINS { GP0, GP1, GP2 }
+#define MATRIX_COL_PINS { GP3, GP4, GP5, GP6 }
+
+#define ENCODERS_PAD_A { GP7, GP10 }
+#define ENCODERS_PAD_B { GP8, GP11 }
+
+#define DIODE_DIRECTION COL2ROW
+```
+
+**KMK (CircuitPython) Example:**
+
+```python
+# main.py
+import board
+from kmk.kmk_keyboard import KMKKeyboard
+from kmk.scanners import DiodeOrientation
+
+keyboard = KMKKeyboard()
+
+keyboard.col_pins = (board.GP3, board.GP4, board.GP5, board.GP6)
+keyboard.row_pins = (board.GP0, board.GP1, board.GP2)
+keyboard.diode_orientation = DiodeOrientation.COL2ROW
+
+keyboard.keymap = [
+    [KC.A, KC.B, KC.C, KC.D,
+     KC.E, KC.F, KC.G, KC.H,
+     KC.I, KC.J, KC.K, KC.L]
+]
+```
+
+**RMK (Rust) Example:**
+
+```rust
+// keyboard.rs
+use rmk::config::{KeyboardConfig, MatrixConfig};
+
+let config = KeyboardConfig {
+    matrix: MatrixConfig {
+        rows: [Pin::new(0), Pin::new(1), Pin::new(2)],
+        cols: [Pin::new(3), Pin::new(4), Pin::new(5), Pin::new(6)],
+        diode_direction: DiodeDirection::Col2Row,
+    },
+    ..Default::default()
+};
+```
+
+### Handling Existing Features
+
+#### Rotary Encoders
+
+Most CH57x keyboards have 1-2 rotary encoders:
+- Encoders use 2 pins for rotation (A/B) + 1 for push button
+- Connect to RP2040 GPIO with internal pull-ups enabled
+- QMK/KMK/RMK all support encoders natively
+
+#### LEDs (RGB Underglow)
+
+If your keyboard has LEDs:
+- WS2812/SK6812: Single data pin to any GPIO
+- Individual LEDs: May need transistor drivers
+- Configure in firmware (e.g., QMK's `RGB_MATRIX_ENABLE`)
+
+#### Layer Switch Button
+
+The physical layer button on CH57x keyboards:
+- Can be repurposed as a function/layer key
+- Wire to a GPIO and configure in keymap
+
+### Preserving Hot-Swap Sockets
+
+The existing Kailh/Gateron hot-swap sockets remain fully usable:
+
+1. **Do not desolder the sockets** - they're the most valuable part
+2. **Trace from socket pads** to matrix connections
+3. **Test continuity** before and after modification
+4. Switches will work identically after MCU swap
+
+### Troubleshooting
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| No keys register | Wrong diode direction | Swap `COL2ROW` ↔ `ROW2COL` |
+| Some keys don't work | Missed trace connection | Re-check continuity |
+| Multiple keys trigger | Missing diodes | Add 1N4148 diodes |
+| Encoder skips | Missing pull-ups | Enable internal pull-ups |
+| USB not detected | Power issue | Check 5V/GND connections |
+
+### Reference Projects
+
+- **MacroBoard**: 9-key XIAO RP2040 macropad with KMK
+  - GitHub: https://github.com/palmacas/MacroBoard
+- **QMK RP2040 Guide**: Official documentation
+  - https://docs.qmk.fm/platformdev_rp2040
+- **Hand Wiring Guide**: QMK hand-wiring tutorial
+  - https://docs.qmk.fm/hand_wire
+- **KB2040 Keyboard Build**: Adafruit tutorial
+  - https://learn.adafruit.com/using-qmk-on-rp2040-microcontrollers
+
+### Cost-Benefit Analysis
+
+| Approach | Cost | Effort | Firmware Freedom | Risk |
+|----------|------|--------|------------------|------|
+| Keep CH57x + this tool | $0 | None | Limited | None |
+| MCU Swap (XIAO) | ~$5 | Medium | Full | Low-Med |
+| MCU Swap (KB2040) | ~$9 | Medium | Full | Low-Med |
+| Buy new RP2040 macropad | $30-60 | None | Full | None |
+| Build from scratch | $40-80 | High | Full | None |
+
+**Recommendation**: If you're comfortable with soldering and want to maximize your existing keyboard, an MCU swap with a XIAO RP2040 or similar provides the best value. The existing hot-swap sockets, case, and switches are worth preserving.
 
 ---
 
