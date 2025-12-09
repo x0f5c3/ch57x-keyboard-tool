@@ -31,6 +31,7 @@
     * [Monitoring generated keyboard and mouse events](#monitoring-generated-keyboard-and-mouse-events)
 * [Supported macro keyboards](#supported-macro-keyboards)
     * [Photos of supported keyboards](#photos-of-supported-keyboards)
+* [Technical Documentation](#technical-documentation)
 
 ## What is this?
 
@@ -307,3 +308,10 @@ python3 -m mouse
 | 3×3 with 2 knobs  | ![keyboard-12-2](doc/keyboard-12-2.png)
 | 4x3 with 3 knobs  | ![keyboard-4-3](doc/keyboard-4-3.png)
 | 4×1 without knobs | ![keyboard-4-1](doc/keyboard-4-1.png)
+
+## Technical Documentation
+
+For developers interested in understanding the internal workings of these keyboards:
+
+* [Available Actions](doc/actions.md) - Complete guide to keyboard, mouse, and media actions
+* [MCU Firmware Research](doc/mcu-firmware-research.md) - Technical deep-dive into CH57x MCU architecture, USB protocol details, and analysis of custom firmware options (RMK, QMK, etc.)
