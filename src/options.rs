@@ -14,7 +14,7 @@ pub struct Options {
     pub devel_options: DevelOptions,
 }
 
-#[derive(Args)]
+#[derive(Args, Clone, Debug)]
 #[clap(version, next_help_heading = "Internal options (use with caution)")]
 pub struct DevelOptions {
     #[arg(long, default_value_t=VENDOR_ID, value_parser=hex_or_decimal)]
@@ -31,6 +31,18 @@ pub struct DevelOptions {
 
     #[arg(long)]
     pub interface_number: Option<u8>,
+}
+
+impl Default for DevelOptions {
+    fn default() -> Self {
+        Self {
+            vendor_id: VENDOR_ID,
+            product_id: None,
+            address: None,
+            endpoint_address: None,
+            interface_number: None,
+        }
+    }
 }
 
 pub fn hex_or_decimal(s: &str) -> Result<u16, ParseIntError>

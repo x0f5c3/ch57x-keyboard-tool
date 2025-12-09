@@ -10,6 +10,9 @@ homepage = "https://github.com/kriomant/ch57x-keyboard-tool"
 repository = "https://github.com/kriomant/ch57x-keyboard-tool.git"
 documentation = "https://docs.rs/crate/ch57x-keyboard-tool"
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [dependencies]
 rusb = "0.9"
 anyhow = "1.0"
