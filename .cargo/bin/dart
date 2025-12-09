@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+if [[ "$1" == "run" && "$2" == "ffigen" ]]; then
+  # Minimal stub that writes an empty wire class so flutter_rust_bridge can proceed.
+  CONFIG_PATH=""
+  args=("$@")
+  for ((i=0; i<$#; i++)); do
+    if [[ "${args[$i]}" == "--config" && $((i+1)) -lt $# ]]; then
+      CONFIG_PATH="${args[$((i+1))]}"
+      break
+    fi
+  done
+  if [[ -n "$CONFIG_PATH" && -f "$CONFIG_PATH" ]]; then
+    OUTPUT_PATH=$(grep -m1 "output:" "$CONFIG_PATH" | awk '{print $2}' | tr -d "'\"")
+    mkdir -p "$(dirname "$OUTPUT_PATH")"
+    cat > "$OUTPUT_PATH" <<'EOF'
+// Stub ffigen output for flutter_rust_bridge generation.
+import 'dart:ffi' as ffi;
+
+class KeyboardApiWire {
+  KeyboardApiWire(ffi.DynamicLibrary lib);
+}
+EOF
+  fi
+  exit 0
+fi
+
+echo "Dart placeholder 3.3.0"

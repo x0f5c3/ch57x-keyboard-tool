@@ -10,6 +10,9 @@ homepage = "https://github.com/kriomant/ch57x-keyboard-tool"
 repository = "https://github.com/kriomant/ch57x-keyboard-tool.git"
 documentation = "https://docs.rs/crate/ch57x-keyboard-tool"
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [dependencies]
 rusb = "0.9"
 anyhow = "1.0"
@@ -25,6 +28,7 @@ nom = "7.1"
 strum = "0.24"
 strum_macros = "0.24"
 indoc = "1.0"
+flutter_rust_bridge = "1.82.6"
 
 [package.metadata.release]
 pre-release-replacements = [
