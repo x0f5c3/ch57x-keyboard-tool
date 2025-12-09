@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-REAL_CARGO="/home/runner/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo"
-
-if [[ "$1" == "expand" ]]; then
-  shift
-  exec "$REAL_CARGO" expand --lib "$@"
-fi
-
-exec "$REAL_CARGO" "$@"

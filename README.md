@@ -44,8 +44,6 @@ Such macro keyboards are popular on AliExpress, and sellers often include softwa
 * It can only program one key at a time
 * It does not expose all keyboard features
 
-A Flutter-based GUI that uses `flutter_rust_bridge` to mirror the key/knob layout and drive the Rust core lives in [flutter_gui/](flutter_gui/README.md).
-
 There are several modifications of such keyboards with different numbers of buttons and knobs (see the [photos of supported keyboards](#photos-of-supported-keyboards)) and with/without Bluetooth.
 
 Both wired and wireless keyboards are supported.

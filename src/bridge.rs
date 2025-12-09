@@ -1,5 +1,4 @@
 use anyhow::Result;
-use flutter_rust_bridge::frb;
 use serde::Serialize;
 
 use crate::app;
@@ -22,7 +21,6 @@ pub struct ValidationSummary {
     pub knobs: u8,
 }
 
-#[frb(sync)]
 pub fn supported_layouts() -> Vec<KeyboardLayoutInfo> {
     vec![
         KeyboardLayoutInfo {
@@ -63,12 +61,10 @@ pub fn supported_layouts() -> Vec<KeyboardLayoutInfo> {
     ]
 }
 
-#[frb(sync)]
 pub fn example_config() -> String {
     include_str!("../example-mapping.yaml").to_string()
 }
 
-#[frb]
 pub fn validate_config_yaml(yaml: String) -> Result<ValidationSummary> {
     let config: Config = serde_yaml::from_str(&yaml)?;
     let buttons = config.rows * config.columns;
@@ -81,7 +77,6 @@ pub fn validate_config_yaml(yaml: String) -> Result<ValidationSummary> {
     })
 }
 
-#[frb]
 pub fn upload_config_yaml(yaml: String, options: Option<DevelOptions>) -> Result<()> {
     let config: Config = serde_yaml::from_str(&yaml)?;
     let opts = options.unwrap_or_default();
