@@ -1,11 +1,12 @@
 use anyhow::Result;
 use flutter_rust_bridge::frb;
+use serde::Serialize;
 
 use crate::app;
 use crate::config::Config;
 use crate::options::DevelOptions;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct KeyboardLayoutInfo {
     pub name: String,
     pub rows: u8,
@@ -14,7 +15,7 @@ pub struct KeyboardLayoutInfo {
     pub description: String,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct ValidationSummary {
     pub layers: usize,
     pub buttons: u8,
